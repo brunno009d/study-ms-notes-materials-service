@@ -28,23 +28,24 @@ class NotesRepository {
         return data;
     }
 
-    // Lista notas enriquecidas por asignatura (1 query con JOINs, < 2s)
+    // Lista notas enriquecidas por asignatura (solo notas raíz)
     async getNotesBySubject(subjectId) {
         const { data, error } = await supabase
             .from('notes')
             .select('id, title, note_tags(tags(name, color_hex)), material(count)')
             .eq('subject_id', subjectId)
+            .is('parent_note_id', null)
             .order('id', { ascending: false });
 
         if (error) throw error;
         return data || [];
     }
 
-    // Detalle completo de una nota con tags y materiales
+    // Detalle completo de una nota con tags, materiales y notas hijas
     async getNoteById(id) {
         const { data, error } = await supabase
             .from('notes')
-            .select('*, note_tags(tags(*)), material(*)')
+            .select('*, note_tags(tags(*)), material(*), child_notes:notes!parent_note_id(id, title)')
             .eq('id', id)
             .single();
 
