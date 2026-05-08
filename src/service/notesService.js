@@ -29,17 +29,26 @@ class NotesService {
 
     // Crear nota con tags opcionales
     async createNote(noteData, userId) {
-        const { subject_id, title, content_text, tag_ids } = noteData;
+        const { subject_id, title, content_text, tag_ids, parent_note_id } = noteData;
 
-        if (!subject_id || !title || !content_text) {
-            const error = new Error('Campos requeridos: subject_id, title, content_text');
+        if (!subject_id || !title) {
+            const error = new Error('Campos requeridos: subject_id, title');
             error.name = 'ValidationError';
             throw error;
         }
 
         await this._verifySubjectOwnership(subject_id, userId);
 
-        const note = await notesRepository.createNote({ subject_id, title, content_text });
+        if (parent_note_id) {
+            await this._verifyNoteOwnership(parent_note_id, userId);
+        }
+
+        const note = await notesRepository.createNote({ 
+            subject_id, 
+            title, 
+            content_text: content_text || '',
+            parent_note_id
+        });
 
         if (tag_ids && tag_ids.length > 0) {
             await notesRepository.linkTagsToNote(note.id, tag_ids);
@@ -49,19 +58,24 @@ class NotesService {
         return await notesRepository.getNoteById(note.id);
     }
 
-    // Actualizar nota (texto y/o tags)
+    // Actualizar nota (texto, tags y/o padre)
     async updateNote(noteId, updateData, userId) {
         await this._verifyNoteOwnership(noteId, userId);
 
         const { tag_ids, ...noteFields } = updateData;
 
         // Filtrar campos permitidos
-        const allowedFields = ['title', 'content_text'];
+        const allowedFields = ['title', 'content_text', 'parent_note_id'];
         const sanitized = {};
         for (const field of allowedFields) {
             if (noteFields[field] !== undefined) {
                 sanitized[field] = noteFields[field];
             }
+        }
+
+        // Verificar propiedad de la nota padre si se intenta mover
+        if (sanitized.parent_note_id) {
+            await this._verifyNoteOwnership(sanitized.parent_note_id, userId);
         }
 
         if (Object.keys(sanitized).length > 0) {
