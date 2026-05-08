@@ -13,6 +13,9 @@ router.use(requireAuth);
 // Sube un archivo a una nota
 router.post('/:note_id/materials', upload.single('file'), materialsController.uploadMaterial);
 
+// Sube un archivo genérico temporal
+router.post('/upload/temp', upload.single('file'), materialsController.uploadTempFile);
+
 // Elimina un material específico
 router.delete('/materials/:material_id', materialsController.deleteMaterial);
 

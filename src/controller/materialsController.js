@@ -23,6 +23,24 @@ class MaterialsController {
             next(error);
         }
     }
+    // Sube un archivo genérico (ej. malla curricular) y devuelve su URL firmada temporal
+    async uploadTempFile(req, res, next) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ message: 'Se requiere un archivo' });
+            }
+            const userId = req.userId;
+            const storagePath = `temp/${userId}/${Date.now()}_${req.file.originalname}`;
+            
+            const storageRepository = require('../repository/storageRepository');
+            await storageRepository.uploadFile(storagePath, req.file.buffer, req.file.mimetype);
+            const fileUrl = await storageRepository.createSignedUrl(storagePath, 3600);
+            
+            res.status(201).json({ file_url: fileUrl });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new MaterialsController();
