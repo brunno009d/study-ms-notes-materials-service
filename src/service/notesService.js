@@ -47,7 +47,8 @@ class NotesService {
             subject_id, 
             title, 
             content_text: content_text || '',
-            parent_note_id
+            parent_note_id,
+            student_id: userId
         });
 
         if (tag_ids && tag_ids.length > 0) {
