@@ -21,6 +21,9 @@ router.delete('/materials/:material_id', materialsController.deleteMaterial);
 
 // NOTAS
 
+// Contenido de notas para resumen IA (usado por ai-service)
+router.get('/subject/:subject_id/content', notesController.getNoteContentsForSummary);
+
 // Lista notas enriquecidas de un ramo
 router.get('/subject/:subject_id', notesController.getNotesBySubject);
 
