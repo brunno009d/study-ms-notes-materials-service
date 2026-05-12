@@ -55,6 +55,26 @@ class NotesController {
             next(error);
         }
     }
+    // Contenido completo de notas para resumen IA (usado por ai-service)
+    async getNoteContentsForSummary(req, res, next) {
+        try {
+            const { subject_id } = req.params;
+            const { from_date, to_date, search, tag_ids } = req.query;
+
+            const filters = {};
+            if (from_date) filters.from_date = from_date;
+            if (to_date) filters.to_date = to_date;
+            if (search) filters.search = search;
+            if (tag_ids) filters.tag_ids = tag_ids.split(',').map(Number);
+
+            const notes = await notesService.getNoteContentsForSummary(
+                parseInt(subject_id), req.userId, filters
+            );
+            res.status(200).json(notes);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new NotesController();

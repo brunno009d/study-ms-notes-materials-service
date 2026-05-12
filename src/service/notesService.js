@@ -47,7 +47,8 @@ class NotesService {
             subject_id, 
             title, 
             content_text: content_text || '',
-            parent_note_id
+            parent_note_id,
+            student_id: userId
         });
 
         if (tag_ids && tag_ids.length > 0) {
@@ -109,6 +110,17 @@ class NotesService {
 
         // Borrar nota (cascade elimina material y note_tags en la BD)
         return await notesRepository.deleteNote(noteId);
+    }
+
+    // --- Métodos para IA ---
+
+    // Obtener contenido de notas para resumen IA
+    async getNoteContentsForSummary(subjectId, userId, filters = {}) {
+        await this._verifySubjectOwnership(subjectId, userId);
+        const notes = await notesRepository.getNoteContentsBySubject(subjectId, filters);
+
+        // Filtrar notas vacías (sin contenido útil para resumir)
+        return notes.filter(n => n.content_text && n.content_text.trim().length > 0);
     }
 
     // --- Métodos privados ---
