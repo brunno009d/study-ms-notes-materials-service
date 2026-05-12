@@ -112,6 +112,17 @@ class NotesService {
         return await notesRepository.deleteNote(noteId);
     }
 
+    // --- Métodos para IA ---
+
+    // Obtener contenido de notas para resumen IA
+    async getNoteContentsForSummary(subjectId, userId, filters = {}) {
+        await this._verifySubjectOwnership(subjectId, userId);
+        const notes = await notesRepository.getNoteContentsBySubject(subjectId, filters);
+
+        // Filtrar notas vacías (sin contenido útil para resumir)
+        return notes.filter(n => n.content_text && n.content_text.trim().length > 0);
+    }
+
     // --- Métodos privados ---
 
     async _verifySubjectOwnership(subjectId, userId) {
