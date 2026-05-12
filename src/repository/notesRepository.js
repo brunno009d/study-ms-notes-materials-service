@@ -111,6 +111,43 @@ class NotesRepository {
         return true;
     }
 
+    // Obtener contenido completo de notas para resumen IA
+    async getNoteContentsBySubject(subjectId, filters = {}) {
+        let query = supabase
+            .from('notes')
+            .select('id, title, content_text, created_at, updated_at, note_tags(tags(id, name))')
+            .eq('subject_id', subjectId)
+            .order('created_at', { ascending: true });
+
+        // Filtro por rango de fechas
+        if (filters.from_date) {
+            query = query.gte('created_at', filters.from_date);
+        }
+        if (filters.to_date) {
+            query = query.lte('created_at', filters.to_date);
+        }
+
+        // Filtro por búsqueda en título o contenido
+        if (filters.search) {
+            query = query.or(
+                `title.ilike.%${filters.search}%,content_text.ilike.%${filters.search}%`
+            );
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        // Filtro por tag_ids (post-query por la estructura relacional)
+        if (filters.tag_ids && filters.tag_ids.length > 0) {
+            return (data || []).filter(note => {
+                const noteTagIds = (note.note_tags || []).map(nt => nt.tags?.id).filter(Boolean);
+                return filters.tag_ids.some(tid => noteTagIds.includes(tid));
+            });
+        }
+
+        return data || [];
+    }
+
     // Obtener materiales de una nota (para borrado de archivos)
     async getMaterialsByNoteId(noteId) {
         const { data, error } = await supabase
