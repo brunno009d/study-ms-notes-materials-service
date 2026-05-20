@@ -125,6 +125,13 @@ class NotesService {
 
     // --- Métodos privados ---
 
+    async getFilteredNotes(userId, filters = {}) {
+        if (filters.subject_id) {
+            await this._verifySubjectOwnership(filters.subject_id, userId);
+        }
+        return await notesRepository.getFilteredNotes(userId, filters);
+    }
+
     async _verifySubjectOwnership(subjectId, userId) {
         const subject = await notesRepository.checkSubjectOwnership(subjectId, userId);
         if (!subject) {
