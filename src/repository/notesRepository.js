@@ -148,6 +148,22 @@ class NotesRepository {
         return data || [];
     }
 
+    // Obtener metadatos de TODAS las notas de un estudiante (sin contenido completo)
+    // Usado por el endpoint /ai-context para el consejero IA
+    async getAllNotesByStudentId(studentId) {
+        const { data, error } = await supabase
+            .from('notes')
+            .select('id, title, subject_id, created_at, updated_at, ' +
+                    'note_tags(tags(id, name, color_hex)), ' +
+                    'subjects(name, code)')
+            .eq('student_id', studentId)
+            .is('parent_note_id', null)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
     // Obtener materiales de una nota (para borrado de archivos)
     async getMaterialsByNoteId(noteId) {
         const { data, error } = await supabase
@@ -156,6 +172,43 @@ class NotesRepository {
             .eq('note_id', noteId);
 
         if (error) throw error;
+        return data || [];
+    }
+
+    // Obtener todas las notas del estudiante con filtros dinámicos (tags, recent_days, subject_id)
+    async getFilteredNotes(studentId, filters = {}) {
+        let query = supabase
+            .from('notes')
+            .select('id, title, subject_id, created_at, updated_at, ' +
+                    'note_tags(tags(id, name, color_hex)), ' +
+                    'subjects(name, code), ' +
+                    'material(count)')
+            .eq('student_id', studentId)
+            .is('parent_note_id', null);
+
+        if (filters.subject_id) {
+            query = query.eq('subject_id', filters.subject_id);
+        }
+
+        if (filters.recent_days) {
+            const dateLimit = new Date();
+            dateLimit.setDate(dateLimit.getDate() - parseInt(filters.recent_days));
+            query = query.gte('created_at', dateLimit.toISOString());
+        }
+
+        query = query.order('created_at', { ascending: false });
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        // Filtrado por tags en JS (estructura anidada)
+        if (filters.tag_ids && filters.tag_ids.length > 0) {
+            return (data || []).filter(note => {
+                const noteTagIds = (note.note_tags || []).map(nt => nt.tags?.id).filter(Boolean);
+                return filters.tag_ids.some(tid => noteTagIds.includes(tid));
+            });
+        }
+
         return data || [];
     }
 }
