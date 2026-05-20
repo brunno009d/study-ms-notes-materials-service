@@ -2,11 +2,15 @@ const express = require('express');
 const router = express.Router();
 const notesController = require('../controller/notesController');
 const materialsController = require('../controller/materialsController');
+const aiContextController = require('../controller/aiContextController');
 const requireAuth = require('../middleware/requireAuth');
 const upload = require('../middleware/upload');
 
 // Aplicar autenticación a todas las rutas
 router.use(requireAuth);
+
+// IA: Metadatos de todas las notas (solo lectura, sin contenido)
+router.get('/ai-context', aiContextController.getContext);
 
 // MATERIALES (rutas específicas antes de las genéricas con :id)
 
@@ -20,6 +24,9 @@ router.post('/upload/temp', upload.single('file'), materialsController.uploadTem
 router.delete('/materials/:material_id', materialsController.deleteMaterial);
 
 // NOTAS
+
+// Obtener listado de todas las notas del alumno con filtros avanzados (tags, recientes, asignatura)
+router.get('/', notesController.getFilteredNotes);
 
 // Contenido de notas para resumen IA (usado por ai-service)
 router.get('/subject/:subject_id/content', notesController.getNoteContentsForSummary);
