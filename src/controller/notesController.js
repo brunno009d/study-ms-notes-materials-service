@@ -75,6 +75,29 @@ class NotesController {
             next(error);
         }
     }
+
+    // Lista todas las notas con filtros flexibles (Tags de estudio, Recientes, por Asignatura)
+    async getFilteredNotes(req, res, next) {
+        try {
+            const { subject_id, tag_ids, recent_days } = req.query;
+            const filters = {};
+
+            if (subject_id) {
+                filters.subject_id = parseInt(subject_id);
+            }
+            if (tag_ids) {
+                filters.tag_ids = tag_ids.split(',').map(Number);
+            }
+            if (recent_days) {
+                filters.recent_days = parseInt(recent_days);
+            }
+
+            const notes = await notesService.getFilteredNotes(req.userId, filters);
+            res.status(200).json(notes);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new NotesController();
