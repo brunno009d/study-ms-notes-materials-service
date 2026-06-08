@@ -38,6 +38,19 @@ class TagsRepository {
         return data;
     }
 
+    // Actualizar tag
+    async updateTag(tagId, data) {
+        const { data: updated, error } = await supabase
+            .from('tags')
+            .update(data)
+            .eq('id', tagId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return updated;
+    }
+
     // Eliminar tag (cascade limpia note_tags)
     async deleteTag(tagId) {
         const { error } = await supabase

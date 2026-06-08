@@ -12,6 +12,9 @@ router.get('/', tagsController.getTags);
 // Crea una nueva tag
 router.post('/', tagsController.createTag);
 
+// Actualiza una tag
+router.put('/:id', tagsController.updateTag);
+
 // Elimina una tag
 router.delete('/:id', tagsController.deleteTag);
 
