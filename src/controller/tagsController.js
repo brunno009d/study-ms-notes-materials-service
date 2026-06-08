@@ -22,6 +22,17 @@ class TagsController {
         }
     }
 
+    // Actualiza una tag
+    async updateTag(req, res, next) {
+        try {
+            const { id } = req.params;
+            const tag = await tagsService.updateTag(parseInt(id), req.body, req.userId);
+            res.status(200).json(tag);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     // Elimina una tag
     async deleteTag(req, res, next) {
         try {
