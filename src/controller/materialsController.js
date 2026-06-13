@@ -1,4 +1,5 @@
-const materialsService = require('../service/materialsService');
+import materialsService from '../service/materialsService.js'
+import storageRepository from '../repository/storageRepository.js'
 
 class MaterialsController {
 
@@ -32,7 +33,6 @@ class MaterialsController {
             const userId = req.userId;
             const storagePath = `temp/${userId}/${Date.now()}_${req.file.originalname}`;
             
-            const storageRepository = require('../repository/storageRepository');
             await storageRepository.uploadFile(storagePath, req.file.buffer, req.file.mimetype);
             const fileUrl = await storageRepository.createSignedUrl(storagePath, 3600);
             
@@ -43,4 +43,4 @@ class MaterialsController {
     }
 }
 
-module.exports = new MaterialsController();
+export default new MaterialsController()
