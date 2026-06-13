@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+import supabase from '../config/supabase.js'
 
 const BUCKET_NAME = 'academic-resources';
 
@@ -40,4 +40,4 @@ class StorageRepository {
     }
 }
 
-module.exports = new StorageRepository();
+export default new StorageRepository()
