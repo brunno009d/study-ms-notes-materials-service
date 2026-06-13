@@ -1,5 +1,5 @@
-const notesRepository = require('../repository/notesRepository');
-const storageRepository = require('../repository/storageRepository');
+import notesRepository from '../repository/notesRepository.js'
+import storageRepository from '../repository/storageRepository.js'
 
 class NotesService {
 
@@ -153,4 +153,4 @@ class NotesService {
     }
 }
 
-module.exports = new NotesService();
+export default new NotesService()
