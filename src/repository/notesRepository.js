@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+import supabase from '../config/supabase.js'
 
 class NotesRepository {
 
@@ -213,4 +213,4 @@ class NotesRepository {
     }
 }
 
-module.exports = new NotesRepository();
+export default new NotesRepository()
