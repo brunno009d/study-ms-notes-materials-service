@@ -1,7 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const tagsController = require('../controller/tagsController');
-const requireAuth = require('../middleware/requireAuth');
+import express from 'express'
+import tagsController from '../controller/tagsController.js'
+import requireAuth from '../middleware/requireAuth.js'
+
+const router = express.Router()
 
 // Aplicar autenticación a todas las rutas
 router.use(requireAuth);
@@ -18,4 +19,4 @@ router.put('/:id', tagsController.updateTag);
 // Elimina una tag
 router.delete('/:id', tagsController.deleteTag);
 
-module.exports = router;
+export default router

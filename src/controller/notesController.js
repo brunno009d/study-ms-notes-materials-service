@@ -1,4 +1,4 @@
-const notesService = require('../service/notesService');
+import notesService from '../service/notesService.js'
 
 class NotesController {
 
@@ -100,4 +100,4 @@ class NotesController {
     }
 }
 
-module.exports = new NotesController();
+export default new NotesController()

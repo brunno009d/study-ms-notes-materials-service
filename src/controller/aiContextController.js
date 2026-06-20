@@ -1,4 +1,4 @@
-const notesRepository = require('../repository/notesRepository');
+import notesRepository from '../repository/notesRepository.js'
 
 // Devuelve TODAS las notas del estudiante (solo lectura)
 const getContext = async (req, res, next) => {
@@ -14,4 +14,4 @@ const getContext = async (req, res, next) => {
     }
 };
 
-module.exports = { getContext };
+export { getContext }

@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+import supabase from '../config/supabase.js'
 
 class TagsRepository {
 
@@ -63,4 +63,4 @@ class TagsRepository {
     }
 }
 
-module.exports = new TagsRepository();
+export default new TagsRepository()

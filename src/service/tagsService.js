@@ -1,4 +1,4 @@
-const tagsRepository = require('../repository/tagsRepository');
+import tagsRepository from '../repository/tagsRepository.js'
 
 class TagsService {
 
@@ -74,4 +74,4 @@ class TagsService {
     }
 }
 
-module.exports = new TagsService();
+export default new TagsService()

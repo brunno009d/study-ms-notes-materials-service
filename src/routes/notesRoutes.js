@@ -1,16 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const notesController = require('../controller/notesController');
-const materialsController = require('../controller/materialsController');
-const aiContextController = require('../controller/aiContextController');
-const requireAuth = require('../middleware/requireAuth');
-const upload = require('../middleware/upload');
+import express from 'express'
+import notesController from '../controller/notesController.js'
+import materialsController from '../controller/materialsController.js'
+import { getContext } from '../controller/aiContextController.js'
+import requireAuth from '../middleware/requireAuth.js'
+import upload from '../middleware/upload.js'
+
+const router = express.Router()
 
 // Aplicar autenticación a todas las rutas
 router.use(requireAuth);
 
 // IA: Metadatos de todas las notas (solo lectura, sin contenido)
-router.get('/ai-context', aiContextController.getContext);
+router.get('/ai-context', getContext);
 
 // MATERIALES (rutas específicas antes de las genéricas con :id)
 
@@ -46,4 +47,4 @@ router.put('/:id', notesController.updateNote);
 // Elimina una nota (cascade + limpieza Storage)
 router.delete('/:id', notesController.deleteNote);
 
-module.exports = router;
+export default router

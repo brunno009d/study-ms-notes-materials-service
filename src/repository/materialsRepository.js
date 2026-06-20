@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+import supabase from '../config/supabase.js'
 
 class MaterialsRepository {
 
@@ -38,4 +38,4 @@ class MaterialsRepository {
     }
 }
 
-module.exports = new MaterialsRepository();
+export default new MaterialsRepository()
