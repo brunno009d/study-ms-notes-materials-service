@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const noteRoutes = require('./routes/notesRoutes');
-const tagsRoutes = require('./routes/tagsRoutes');
-const errorHandler = require('./middleware/errorHandler');
+import express from 'express'
+import cors from 'cors'
+import noteRoutes from './routes/notesRoutes.js'
+import tagsRoutes from './routes/tagsRoutes.js'
+import errorHandler from './middleware/errorHandler.js'
 
 const app = express();
 
@@ -35,4 +35,4 @@ app.use((req, res) => {
 // Manejo de errores global
 app.use(errorHandler);
 
-module.exports = app;
+export default app

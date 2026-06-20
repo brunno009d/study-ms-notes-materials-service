@@ -1,6 +1,6 @@
-const materialsRepository = require('../repository/materialsRepository');
-const notesRepository = require('../repository/notesRepository');
-const storageRepository = require('../repository/storageRepository');
+import materialsRepository from '../repository/materialsRepository.js'
+import notesRepository from '../repository/notesRepository.js'
+import storageRepository from '../repository/storageRepository.js'
 
 class MaterialsService {
 
@@ -66,4 +66,4 @@ class MaterialsService {
     }
 }
 
-module.exports = new MaterialsService();
+export default new MaterialsService()
