@@ -100,6 +100,33 @@ describe('notesController — deleteNote', () => {
   })
 })
 
+// ─── getFilteredNotes ─────────────────────────────────────────────────────────
+
+describe('notesController — getFilteredNotes', () => {
+  it('pasa filtros del query al service y responde 200', async () => {
+    notesService.getFilteredNotes.mockResolvedValue([{ id: 1 }, { id: 2 }])
+    const req = {
+      userId: 'u1',
+      query: { subject_id: '7', tag_ids: '1,3', recent_days: '14' }
+    }
+    const res = mockRes()
+    await controller.getFilteredNotes(req, res, vi.fn())
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(notesService.getFilteredNotes).toHaveBeenCalledWith(
+      'u1',
+      expect.objectContaining({ subject_id: 7, tag_ids: [1, 3], recent_days: 14 })
+    )
+  })
+
+  it('pasa objeto de filtros vacío cuando no hay query params', async () => {
+    notesService.getFilteredNotes.mockResolvedValue([])
+    const req = { userId: 'u1', query: {} }
+    const res = mockRes()
+    await controller.getFilteredNotes(req, res, vi.fn())
+    expect(notesService.getFilteredNotes).toHaveBeenCalledWith('u1', {})
+  })
+})
+
 // ─── getNoteContentsForSummary ────────────────────────────────────────────────
 
 describe('notesController — getNoteContentsForSummary', () => {
