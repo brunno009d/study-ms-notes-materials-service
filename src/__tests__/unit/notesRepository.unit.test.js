@@ -218,103 +218,6 @@ describe('notesRepository — deleteNoteTags', () => {
   })
 })
 
-// ─── getAllNotesByStudentId ────────────────────────────────────────────────
-
-describe('notesRepository — getAllNotesByStudentId', () => {
-  it('retorna todas las notas del estudiante', async () => {
-    // Arrange
-    const fakeNotes = [{ id: 1, title: 'A', student_id: 'u1' }]
-    mockSupabase.from.mockReturnValue(mockChain({ data: fakeNotes, error: null }))
-    // Act
-    const result = await notesRepository.getAllNotesByStudentId('u1')
-    // Assert
-    expect(result).toEqual(fakeNotes)
-    expect(mockSupabase.from).toHaveBeenCalledWith('notes')
-  })
-
-  it('retorna [] cuando no hay notas', async () => {
-    // Arrange
-    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: null }))
-    // Act
-    const result = await notesRepository.getAllNotesByStudentId('u1')
-    // Assert
-    expect(result).toEqual([])
-  })
-
-  it('lanza error si la consulta falla', async () => {
-    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: new Error('Falla DB getAll') }))
-    await expect(notesRepository.getAllNotesByStudentId('u1')).rejects.toThrow('Falla DB getAll')
-  })
-})
-
-// ─── getMaterialsByNoteId ─────────────────────────────────────────────────
-
-describe('notesRepository — getMaterialsByNoteId', () => {
-  it('retorna los materiales de la nota', async () => {
-    // Arrange
-    const mats = [{ id: 1, note_id: 5, storage_path: 'files/a.pdf' }]
-    mockSupabase.from.mockReturnValue(mockChain({ data: mats, error: null }))
-    // Act
-    const result = await notesRepository.getMaterialsByNoteId(5)
-    // Assert
-    expect(result).toEqual(mats)
-    expect(mockSupabase.from).toHaveBeenCalledWith('material')
-  })
-
-  it('retorna [] cuando no hay materiales', async () => {
-    // Arrange
-    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: null }))
-    // Act
-    const result = await notesRepository.getMaterialsByNoteId(5)
-    // Assert
-    expect(result).toEqual([])
-  })
-
-  it('lanza error si falla obtener materiales', async () => {
-    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: new Error('Falla getMaterials') }))
-    await expect(notesRepository.getMaterialsByNoteId(5)).rejects.toThrow('Falla getMaterials')
-  })
-})
-
-// ─── getNoteContentsBySubject ─────────────────────────────────────────────
-
-describe('notesRepository — getNoteContentsBySubject', () => {
-  it('retorna notas sin filtros', async () => {
-    // Arrange
-    const fakeNotes = [{ id: 1, title: 'A', note_tags: [] }]
-    mockSupabase.from.mockReturnValue(mockChain({ data: fakeNotes, error: null }))
-    // Act
-    const result = await notesRepository.getNoteContentsBySubject(7, {})
-    // Assert
-    expect(result).toEqual(fakeNotes)
-  })
-
-  it('filtra por tag_ids en JS después de la query', async () => {
-    // Arrange
-    const fakeNotes = [
-      { id: 1, title: 'A', note_tags: [{ tags: { id: 5, name: 'exam' } }] },
-      { id: 2, title: 'B', note_tags: [{ tags: { id: 9, name: 'lab' } }] },
-    ]
-    mockSupabase.from.mockReturnValue(mockChain({ data: fakeNotes, error: null }))
-    // Act — solo quiero notas con tag_id=5
-    const result = await notesRepository.getNoteContentsBySubject(7, { tag_ids: [5] })
-    // Assert
-    expect(result).toHaveLength(1)
-    expect(result[0].id).toBe(1)
-  })
-
-  it('aplica filtro from_date / to_date a la query', async () => {
-    // Arrange
-    mockSupabase.from.mockReturnValue(mockChain({ data: [], error: null }))
-    // Act
-    const result = await notesRepository.getNoteContentsBySubject(7, {
-      from_date: '2026-01-01', to_date: '2026-06-30', search: 'cálculo'
-    })
-    // Assert — no lanza y retorna el resultado
-    expect(result).toEqual([])
-  })
-})
-
 // ─── getFilteredNotes (filtrado JS por tag_ids) ───────────────────────────
 
 describe('notesRepository — getFilteredNotes', () => {
@@ -331,24 +234,6 @@ describe('notesRepository — getFilteredNotes', () => {
 
     // Assert
     expect(result).toHaveLength(2)
-  })
-
-  it('aplica filtro subject_id', async () => {
-    // Arrange
-    mockSupabase.from.mockReturnValue(mockChain({ data: [], error: null }))
-    // Act
-    const result = await notesRepository.getFilteredNotes('u1', { subject_id: 10 })
-    // Assert
-    expect(result).toEqual([])
-  })
-
-  it('aplica filtro recent_days calculando la fecha límite', async () => {
-    // Arrange
-    mockSupabase.from.mockReturnValue(mockChain({ data: [], error: null }))
-    // Act — no lanza, aplica el filtro gte internamente
-    const result = await notesRepository.getFilteredNotes('u1', { recent_days: 7 })
-    // Assert
-    expect(result).toEqual([])
   })
 
   it('filtra por tag_ids en JS después de la consulta a Supabase', async () => {

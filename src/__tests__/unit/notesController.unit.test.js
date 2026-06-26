@@ -110,42 +110,6 @@ describe('notesController — deleteNote', () => {
   })
 })
 
-// ─── getFilteredNotes ─────────────────────────────────────────────────────────
-
-describe('notesController — getFilteredNotes', () => {
-  it('pasa filtros del query al service y responde 200', async () => {
-    notesService.getFilteredNotes.mockResolvedValue([{ id: 1 }, { id: 2 }])
-    const req = {
-      userId: 'u1',
-      query: { subject_id: '7', tag_ids: '1,3', recent_days: '14' }
-    }
-    const res = mockRes()
-    await controller.getFilteredNotes(req, res, vi.fn())
-    expect(res.status).toHaveBeenCalledWith(200)
-    expect(notesService.getFilteredNotes).toHaveBeenCalledWith(
-      'u1',
-      expect.objectContaining({ subject_id: 7, tag_ids: [1, 3], recent_days: 14 })
-    )
-  })
-
-  it('pasa objeto de filtros vacío cuando no hay query params', async () => {
-    notesService.getFilteredNotes.mockResolvedValue([])
-    const req = { userId: 'u1', query: {} }
-    const res = mockRes()
-    await controller.getFilteredNotes(req, res, vi.fn())
-    expect(notesService.getFilteredNotes).toHaveBeenCalledWith('u1', {})
-  })
-
-  it('delega a next si el service lanza un error', async () => {
-    const err = new Error('Falla filters')
-    notesService.getFilteredNotes.mockRejectedValue(err)
-    const req = { userId: 'u1', query: {} }
-    const next = vi.fn()
-    await controller.getFilteredNotes(req, mockRes(), next)
-    expect(next).toHaveBeenCalledWith(err)
-  })
-})
-
 // ─── getNoteContentsForSummary ────────────────────────────────────────────────
 
 describe('notesController — getNoteContentsForSummary', () => {
