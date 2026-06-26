@@ -96,7 +96,17 @@ describe('notesController — deleteNote', () => {
     const res = mockRes()
     await controller.deleteNote(req, res, vi.fn())
     expect(res.status).toHaveBeenCalledWith(204)
+    expect(res.status).toHaveBeenCalledWith(204)
     expect(notesService.deleteNote).toHaveBeenCalledWith(5, 'u1')
+  })
+
+  it('delega a next si el service lanza un error', async () => {
+    const err = new Error('Falla delete')
+    notesService.deleteNote.mockRejectedValue(err)
+    const req = { userId: 'u1', params: { id: '5' } }
+    const next = vi.fn()
+    await controller.deleteNote(req, mockRes(), next)
+    expect(next).toHaveBeenCalledWith(err)
   })
 })
 
@@ -125,5 +135,22 @@ describe('notesController — getNoteContentsForSummary', () => {
     const res = mockRes()
     await controller.getNoteContentsForSummary(req, res, vi.fn())
     expect(notesService.getNoteContentsForSummary).toHaveBeenCalledWith(7, 'u1', {})
+  })
+
+  it('pasa filtros parciales to_date y search cuando estan presentes', async () => {
+    notesService.getNoteContentsForSummary.mockResolvedValue([])
+    const req = { userId: 'u1', params: { subject_id: '7' }, query: { to_date: '2026-12-31', search: 'math' } }
+    const res = mockRes()
+    await controller.getNoteContentsForSummary(req, res, vi.fn())
+    expect(notesService.getNoteContentsForSummary).toHaveBeenCalledWith(7, 'u1', { to_date: '2026-12-31', search: 'math' })
+  })
+
+  it('delega a next si el service lanza un error', async () => {
+    const err = new Error('Falla contents')
+    notesService.getNoteContentsForSummary.mockRejectedValue(err)
+    const req = { userId: 'u1', params: { subject_id: '7' }, query: {} }
+    const next = vi.fn()
+    await controller.getNoteContentsForSummary(req, mockRes(), next)
+    expect(next).toHaveBeenCalledWith(err)
   })
 })

@@ -75,6 +75,16 @@ describe('notesService — createNote', () => {
     // Assert
     expect(notesRepository.linkTagsToNote).toHaveBeenCalledWith('n1', ['t1'])
   })
+
+  it('verifica propiedad de parent_note_id si se proporciona', async () => {
+    // Arrange
+    notesRepository.checkSubjectOwnership.mockResolvedValue({ id: 'sub1' })
+    notesRepository.checkNoteOwnership.mockResolvedValue(null) // falla propiedad parent
+    // Act & Assert
+    const err = await notesService.createNote({ subject_id: 'sub1', title: 'hija', parent_note_id: 'p1' }, 'u1').catch(e => e)
+    expect(err.status).toBe(404)
+    expect(notesRepository.checkNoteOwnership).toHaveBeenCalledWith('p1', 'u1')
+  })
 })
 
 // ─── getNoteById ─────────────────────────────────────────────────────────────
@@ -143,7 +153,19 @@ describe('notesService — updateNote', () => {
     notesRepository.getNoteById.mockResolvedValue({ id: 'n1' })
     await notesService.updateNote('n1', { tag_ids: [] }, 'u1')
     expect(notesRepository.deleteNoteTags).toHaveBeenCalledWith('n1')
+    expect(notesRepository.deleteNoteTags).toHaveBeenCalledWith('n1')
     expect(notesRepository.linkTagsToNote).not.toHaveBeenCalled()
+  })
+
+  it('verifica propiedad de parent_note_id si se intenta mover la nota', async () => {
+    // Arrange
+    notesRepository.checkNoteOwnership.mockResolvedValueOnce({ id: 'n1' }) // propiedad n1 ok
+    notesRepository.checkNoteOwnership.mockResolvedValueOnce(null) // propiedad parent_note_id falla
+    // Act
+    const err = await notesService.updateNote('n1', { parent_note_id: 'p1' }, 'u1').catch(e => e)
+    // Assert
+    expect(err.status).toBe(404)
+    expect(notesRepository.checkNoteOwnership).toHaveBeenCalledWith('p1', 'u1')
   })
 })
 
@@ -195,6 +217,33 @@ describe('notesService — getNoteContentsForSummary', () => {
     const result = await notesService.getNoteContentsForSummary('sub1', 'u1')
     // Assert
     expect(result).toHaveLength(1)
+    // Assert
+    expect(result).toHaveLength(1)
     expect(result[0].id).toBe('n1')
+  })
+})
+
+// ─── getFilteredNotes ────────────────────────────────────────────────────────
+
+describe('notesService — getFilteredNotes', () => {
+  it('verifica propiedad de la asignatura si subject_id esta en filtros', async () => {
+    // Arrange
+    notesRepository.checkSubjectOwnership.mockResolvedValue(null) // Falla propiedad
+    // Act
+    const err = await notesService.getFilteredNotes('u1', { subject_id: 'sub1' }).catch(e => e)
+    // Assert
+    expect(err.status).toBe(403)
+    expect(notesRepository.checkSubjectOwnership).toHaveBeenCalledWith('sub1', 'u1')
+  })
+
+  it('obtiene notas filtradas si validacion es exitosa', async () => {
+    // Arrange
+    notesRepository.checkSubjectOwnership.mockResolvedValue({ id: 'sub1' })
+    notesRepository.getFilteredNotes.mockResolvedValue([{ id: 'n1' }])
+    // Act
+    const result = await notesService.getFilteredNotes('u1', { subject_id: 'sub1' })
+    // Assert
+    expect(result).toEqual([{ id: 'n1' }])
+    expect(notesRepository.getFilteredNotes).toHaveBeenCalledWith('u1', { subject_id: 'sub1' })
   })
 })

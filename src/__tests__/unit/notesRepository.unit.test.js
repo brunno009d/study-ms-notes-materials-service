@@ -47,6 +47,38 @@ describe('notesRepository — checkSubjectOwnership', () => {
     // Assert
     expect(result).toBeNull()
   })
+
+  it('lanza error si falla la consulta', async () => {
+    // Arrange
+    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: new Error('Falla DB') }))
+
+    // Act & Assert
+    await expect(notesRepository.checkSubjectOwnership(5, 'u1')).rejects.toThrow('Falla DB')
+  })
+})
+
+// ─── checkNoteOwnership ───────────────────────────────────────────────────
+
+describe('notesRepository — checkNoteOwnership', () => {
+  it('retorna el dato cuando la nota pertenece al usuario', async () => {
+    // Arrange
+    const fakeData = { id: 10 }
+    mockSupabase.from.mockReturnValue(mockChain({ data: fakeData, error: null }))
+
+    // Act
+    const result = await notesRepository.checkNoteOwnership(10, 'u1')
+
+    // Assert
+    expect(result).toEqual(fakeData)
+  })
+
+  it('lanza error si falla la consulta', async () => {
+    // Arrange
+    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: new Error('Falla checkNote') }))
+
+    // Act & Assert
+    await expect(notesRepository.checkNoteOwnership(10, 'u1')).rejects.toThrow('Falla checkNote')
+  })
 })
 
 // ─── getNotesBySubject ─────────────────────────────────────────────────────
@@ -116,6 +148,14 @@ describe('notesRepository — updateNote', () => {
     // Assert
     expect(result).toEqual(updated)
   })
+
+  it('lanza error cuando falla al actualizar', async () => {
+    // Arrange
+    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: new Error('Falla update') }))
+
+    // Act & Assert
+    await expect(notesRepository.updateNote(3, {})).rejects.toThrow('Falla update')
+  })
 })
 
 describe('notesRepository — deleteNote', () => {
@@ -144,6 +184,37 @@ describe('notesRepository — linkTagsToNote', () => {
     // Assert
     expect(result).toBe(true)
     expect(mockSupabase.from).toHaveBeenCalledWith('note_tags')
+  })
+
+  it('lanza error al fallar la vinculacion', async () => {
+    // Arrange
+    mockSupabase.from.mockReturnValue(mockChain({ error: new Error('Falla link') }))
+
+    // Act & Assert
+    await expect(notesRepository.linkTagsToNote(3, [1, 2])).rejects.toThrow('Falla link')
+  })
+})
+
+// ─── deleteNoteTags ────────────────────────────────────────────────────────
+
+describe('notesRepository — deleteNoteTags', () => {
+  it('retorna true al eliminar tags exitosamente', async () => {
+    // Arrange
+    mockSupabase.from.mockReturnValue(mockChain({ error: null }))
+
+    // Act
+    const result = await notesRepository.deleteNoteTags(3)
+
+    // Assert
+    expect(result).toBe(true)
+  })
+
+  it('lanza error al fallar la eliminacion de tags', async () => {
+    // Arrange
+    mockSupabase.from.mockReturnValue(mockChain({ error: new Error('Falla deleteNoteTags') }))
+
+    // Act & Assert
+    await expect(notesRepository.deleteNoteTags(3)).rejects.toThrow('Falla deleteNoteTags')
   })
 })
 
@@ -178,6 +249,16 @@ describe('notesRepository — getFilteredNotes', () => {
 
     // Assert — solo Nota A tiene el tag id=1
     expect(result).toHaveLength(1)
+    // Assert — solo Nota A tiene el tag id=1
+    expect(result).toHaveLength(1)
     expect(result[0].title).toBe('Nota A')
+  })
+
+  it('lanza error si la consulta falla', async () => {
+    // Arrange
+    mockSupabase.from.mockReturnValue(mockChain({ data: null, error: new Error('Falla DB filtros') }))
+
+    // Act & Assert
+    await expect(notesRepository.getFilteredNotes('u1', {})).rejects.toThrow('Falla DB filtros')
   })
 })
